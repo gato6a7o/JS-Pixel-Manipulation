@@ -1,3 +1,3 @@
 JavaScript Pixel Manipulation
 
-https://noruii.github.io/JS-Pixel-Manipulation/
+https://gato6a7o.github.io/JS-Pixel-Manipulation/
