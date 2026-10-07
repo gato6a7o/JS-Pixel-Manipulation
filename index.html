@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +8,97 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="canvas1"></canvas>
+    <canvas id="canvas1" role="img"></canvas>
+    <aside class="settings-panel">
+        <details open>
+            <summary>
+                <h1 class="panel-title">Ajuste de las particulas</h1>
+                <span class="disclosure-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="panel-content">
+
+                <fieldset class="mode-options">
+                    <div class="mode-list">
+                        <label class="mode-option" for="mode-personalizado">
+                            <input id="mode-personalizado" type="radio" name="particle-mode" value="personalizado" checked>
+                            <span>Personalizado</span>
+                        </label>
+                        <label class="mode-option" for="mode-suave">
+                            <input id="mode-suave" type="radio" name="particle-mode" value="suave">
+                            <span>Suave</span>
+                        </label>
+                        <label class="mode-option" for="mode-explosivo">
+                            <input id="mode-explosivo" type="radio" name="particle-mode" value="explosivo">
+                            <span>Explosivo</span>
+                        </label>
+                        <label class="mode-option" for="mode-elastico">
+                            <input id="mode-elastico" type="radio" name="particle-mode" value="elastico">
+                            <span>Elastico</span>
+                        </label>
+                        <label class="mode-option" for="mode-magnetico">
+                            <input id="mode-magnetico" type="radio" name="particle-mode" value="magnetico">
+                            <span>Magnetico</span>
+                        </label>
+                        <label class="mode-option" for="mode-repulsion">
+                            <input id="mode-repulsion" type="radio" name="particle-mode" value="repulsion">
+                            <span>Repulsion</span>
+                        </label>
+                        <label class="mode-option" for="mode-vortice">
+                            <input id="mode-vortice" type="radio" name="particle-mode" value="vortice">
+                            <span>Vortice</span>
+                        </label>
+                        <label class="mode-option" for="mode-liquido">
+                            <input id="mode-liquido" type="radio" name="particle-mode" value="liquido">
+                            <span>Liquido</span>
+                        </label>
+                        <label class="mode-option" for="mode-caotico">
+                            <input id="mode-caotico" type="radio" name="particle-mode" value="caotico">
+                            <span>Caotico</span>
+                        </label>
+                        <label class="mode-option" for="mode-gravedad">
+                            <input id="mode-gravedad" type="radio" name="particle-mode" value="gravedad">
+                            <span>Gravedad</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <section class="custom-settings">
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2>Empuje</h2>
+                            <span class="setting-value">0,9</span>
+                        </div>
+                        <p class="setting-description">Intensidad de la dispersion</p>
+                        <div class="control-preview" aria-hidden="true" style="--fill: 68%;">
+                            <span></span>
+                        </div>
+                    </section>
+
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2>Radio del raton</h2>
+                            <span class="setting-value">80 px</span>
+                        </div>
+                        <p class="setting-description">Zona de reaccion alrededor del cursor</p>
+                        <div class="control-preview" aria-hidden="true" style="--fill: 42%;">
+                            <span></span>
+                        </div>
+                    </section>
+
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2>Regreso</h2>
+                            <span class="setting-value">0,1</span>
+                        </div>
+                        <p class="setting-description">Velocidad para volver a la posicion inicial</p>
+                        <div class="control-preview" aria-hidden="true" style="--fill: 34%;">
+                            <span></span>
+                        </div>
+                    </section>
+                </section>
+            </div>
+        </details>
+    </aside>
     <script src="script.js"></script>
 </body>
 </html>
