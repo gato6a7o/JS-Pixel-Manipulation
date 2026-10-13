@@ -23,10 +23,6 @@
                             <input id="mode-personalizado" type="radio" name="particle-mode" value="personalizado" checked>
                             <span>Personalizado</span>
                         </label>
-                        <label class="mode-option" for="mode-suave">
-                            <input id="mode-suave" type="radio" name="particle-mode" value="suave">
-                            <span>Suave</span>
-                        </label>
                         <label class="mode-option" for="mode-explosivo">
                             <input id="mode-explosivo" type="radio" name="particle-mode" value="explosivo">
                             <span>Explosivo</span>
@@ -66,33 +62,36 @@
                     <section class="setting">
                         <div class="setting-heading">
                             <h2>Empuje</h2>
-                            <span class="setting-value">0,9</span>
+                            <output id="push-value" class="setting-value" for="push-strength">0,9</output>
                         </div>
-                        <p class="setting-description">Intensidad de la dispersion</p>
-                        <div class="control-preview" aria-hidden="true" style="--fill: 68%;">
+                        <p id="push-description" class="setting-description">Intensidad de la dispersion</p>
+                        <div class="control-preview" style="--fill: 30%;">
                             <span></span>
+                            <input id="push-strength" class="setting-slider" type="range" min="0" max="3" step="0.1" value="0.9">
                         </div>
                     </section>
 
                     <section class="setting">
                         <div class="setting-heading">
                             <h2>Radio del raton</h2>
-                            <span class="setting-value">80 px</span>
+                            <output id="radius-value" class="setting-value" for="interaction-radius">80 px</output>
                         </div>
-                        <p class="setting-description">Zona de reaccion alrededor del cursor</p>
-                        <div class="control-preview" aria-hidden="true" style="--fill: 42%;">
+                        <p id="radius-description" class="setting-description">Zona de reaccion alrededor del cursor</p>
+                        <div class="control-preview" style="--fill: 24.1379%;">
                             <span></span>
+                            <input id="interaction-radius" class="setting-slider" type="range" min="10" max="300" step="1" value="80">
                         </div>
                     </section>
 
                     <section class="setting">
                         <div class="setting-heading">
                             <h2>Regreso</h2>
-                            <span class="setting-value">0,1</span>
+                            <output id="return-value" class="setting-value" for="return-speed">0,1</output>
                         </div>
-                        <p class="setting-description">Velocidad para volver a la posicion inicial</p>
-                        <div class="control-preview" aria-hidden="true" style="--fill: 34%;">
+                        <p id="return-description" class="setting-description">Velocidad para volver a la posicion inicial</p>
+                        <div class="control-preview" style="--fill: 33.3333%;">
                             <span></span>
+                            <input id="return-speed" class="setting-slider" type="range" min="0" max="0.3" step="0.01" value="0.1">
                         </div>
                     </section>
                 </section>

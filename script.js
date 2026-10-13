@@ -4,16 +4,56 @@ canvas.width  = window.innerWidth;
 canvas.height = window.innerHeight;
 let particleArray = [];
 
+// Shared settings are read on each frame; changing them never restarts animation.
+const particleSettings = {
+    pushStrength: 0.9,
+    interactionRadius: 80,
+    returnSpeed: 0.1
+};
+const settingControls = [
+    { inputId: 'push-strength', outputId: 'push-value', key: 'pushStrength', unit: '' },
+    { inputId: 'interaction-radius', outputId: 'radius-value', key: 'interactionRadius', unit: ' px' },
+    { inputId: 'return-speed', outputId: 'return-value', key: 'returnSpeed', unit: '' }
+];
+
+settingControls.forEach(function(control) {
+    const input = document.getElementById(control.inputId);
+    const output = document.getElementById(control.outputId);
+
+    function updateSetting() {
+        const value = input.valueAsNumber;
+        particleSettings[control.key] = value;
+        output.textContent = value.toLocaleString('es-ES') + control.unit;
+        input.setAttribute('aria-valuetext', output.textContent);
+        const fill = (value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100;
+        input.parentElement.style.setProperty('--fill', fill + '%');
+    }
+
+    input.addEventListener('input', updateSetting);
+    updateSetting();
+});
+
 // get mouse position
 let mouse = {
 	x: null,
-	y: null,
-    radius: 80
+	y: null
 }
+function clearMousePosition() {
+    mouse.x = null;
+    mouse.y = null;
+}
+const settingsPanel = document.querySelector('.settings-panel');
 window.addEventListener('mousemove', function(event){
+		if (settingsPanel.contains(event.target)) {
+            clearMousePosition();
+            return;
+        }
 		mouse.x = event.x + canvas.clientLeft/2;
 		mouse.y = event.y + canvas.clientTop/2;
 });
+settingsPanel.addEventListener('mouseenter', clearMousePosition);
+document.documentElement.addEventListener('mouseleave', clearMousePosition);
+window.addEventListener('blur', clearMousePosition);
 
 function drawImg(){
     let imageWidth = png.width;
@@ -41,31 +81,32 @@ function drawImg(){
             // check mouse position/particle position - collision detection
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
-            let distance = Math.sqrt(dx*dx + dy*dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
+            let distance = mouse.x === null || mouse.y === null ? Infinity : Math.sqrt(dx*dx + dy*dy);
+            // Coincident positions have no direction: avoid dividing by zero.
+            let forceDirectionX = distance > 0 ? dx / distance : 0;
+            let forceDirectionY = distance > 0 ? dy / distance : 0;
             // distance past which the force is zero
-            var maxDistance = 80;
+            var maxDistance = particleSettings.interactionRadius;
             var force = (maxDistance - distance) / maxDistance;
 
             // if we go below zero, set it to zero.
             if (force < 0) force = 0;
 
-            let directionX = (forceDirectionX * force * this.density) * 0.9; // fuerza con la que se empujan las particulas (org 0.9)
-            let directionY = (forceDirectionY * force * this.density) * 0.9;
+            let directionX = (forceDirectionX * force * this.density) * particleSettings.pushStrength; // fuerza con la que se empujan las particulas (org 0.9)
+            let directionY = (forceDirectionY * force * this.density) * particleSettings.pushStrength;
 
-            if (distance < mouse.radius + this.size){
+            if (distance < maxDistance + this.size){
                 this.x -= directionX;
                 this.y -= directionY;
             } else {
                 if (this.x !== this.baseX ) {
                     let dx = this.x - this.baseX;
                     let dy = this.y - this.baseY;
-                    this.x -= dx/10; // velocidad con la que las particuals vuelve a su posicion org (original 5)
+                    this.x -= dx * particleSettings.returnSpeed; // velocidad con la que las particuals vuelve a su posicion org (original 5)
                 } if (this.y !== this.baseY) {
                     let dx = this.x - this.baseX;
                     let dy = this.y - this.baseY;
-                    this.y -= dy/10;
+                    this.y -= dy * particleSettings.returnSpeed;
                 }
             }
             this.draw();
