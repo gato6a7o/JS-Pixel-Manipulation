@@ -19,9 +19,13 @@
 
                 <fieldset class="mode-options">
                     <div class="mode-list">
-                        <label class="mode-option" for="mode-personalizado">
-                            <input id="mode-personalizado" type="radio" name="particle-mode" value="personalizado" checked>
-                            <span>Personalizado</span>
+                        <label class="mode-option" for="mode-default">
+                            <input id="mode-default" type="radio" name="particle-mode" value="default" checked>
+                            <span>Default</span>
+                        </label>
+                        <label class="mode-option" for="mode-repulsion">
+                            <input id="mode-repulsion" type="radio" name="particle-mode" value="repulsion">
+                            <span>Repulsion</span>
                         </label>
                         <label class="mode-option" for="mode-explosivo">
                             <input id="mode-explosivo" type="radio" name="particle-mode" value="explosivo">
@@ -34,10 +38,6 @@
                         <label class="mode-option" for="mode-magnetico">
                             <input id="mode-magnetico" type="radio" name="particle-mode" value="magnetico">
                             <span>Magnetico</span>
-                        </label>
-                        <label class="mode-option" for="mode-repulsion">
-                            <input id="mode-repulsion" type="radio" name="particle-mode" value="repulsion">
-                            <span>Repulsion</span>
                         </label>
                         <label class="mode-option" for="mode-vortice">
                             <input id="mode-vortice" type="radio" name="particle-mode" value="vortice">
@@ -67,7 +67,7 @@
                         <p id="push-description" class="setting-description">Intensidad de la dispersion</p>
                         <div class="control-preview" style="--fill: 30%;">
                             <span></span>
-                            <input id="push-strength" class="setting-slider" type="range" min="0" max="3" step="0.1" value="0.9">
+                            <input id="push-strength" class="setting-slider" type="range" min="0.1" max="3" step="0.1" value="0.9">
                         </div>
                     </section>
 
@@ -92,6 +92,67 @@
                         <div class="control-preview" style="--fill: 33.3333%;">
                             <span></span>
                             <input id="return-speed" class="setting-slider" type="range" min="0" max="0.3" step="0.01" value="0.1">
+                        </div>
+                    </section>
+                </section>
+                <section class="repulsion-settings">
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2><label for="repulsion-strength">Fuerza de repulsion</label></h2>
+                            <output id="repulsion-value" class="setting-value" for="repulsion-strength">2400 px/s</output>
+                        </div>
+                        <p class="setting-description">Velocidad inicial hacia afuera</p>
+                        <div class="control-preview">
+                            <span></span>
+                            <input id="repulsion-strength" class="setting-slider" type="range" min="100" max="6000" step="100" value="2400">
+                        </div>
+                    </section>
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2><label for="repulsion-radius">Radio del raton</label></h2>
+                            <output id="repulsion-radius-value" class="setting-value" for="repulsion-radius">80 px</output>
+                        </div>
+                        <p class="setting-description">Zona de reaccion alrededor del cursor</p>
+                        <div class="control-preview">
+                            <span></span>
+                            <input id="repulsion-radius" class="setting-slider" type="range" min="10" max="300" step="1" value="80">
+                        </div>
+                    </section>
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2><label for="inertia-duration">Duracion de la inercia</label></h2>
+                            <output id="inertia-value" class="setting-value" for="inertia-duration">1 s</output>
+                        </div>
+                        <p class="setting-description">Tiempo maximo de desplazamiento antes de regresar</p>
+                        <div class="control-preview">
+                            <span></span>
+                            <input id="inertia-duration" class="setting-slider" type="range" min="0.2" max="5" step="0.1" value="1">
+                        </div>
+                    </section>
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2><label for="repulsion-return">Velocidad de regreso</label></h2>
+                            <output id="repulsion-return-value" class="setting-value" for="repulsion-return">0,1</output>
+                        </div>
+                        <p class="setting-description">Rapidez con la que se recompone la imagen</p>
+                        <div class="control-preview">
+                            <span></span>
+                            <input id="repulsion-return" class="setting-slider" type="range" min="0.01" max="0.3" step="0.01" value="0.1">
+                        </div>
+                    </section>
+                    <label class="bounce-toggle" for="bounce-enabled">
+                        <input id="bounce-enabled" type="checkbox" checked>
+                        Rebotar en los bordes
+                    </label>
+                    <section class="setting">
+                        <div class="setting-heading">
+                            <h2><label for="bounce-retention">Intensidad del rebote</label></h2>
+                            <output id="bounce-value" class="setting-value" for="bounce-retention">60 %</output>
+                        </div>
+                        <p class="setting-description">Porcentaje de velocidad que conserva cada choque</p>
+                        <div class="control-preview">
+                            <span></span>
+                            <input id="bounce-retention" class="setting-slider" type="range" min="0" max="90" step="1" value="60">
                         </div>
                     </section>
                 </section>

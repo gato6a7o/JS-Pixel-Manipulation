@@ -6,23 +6,40 @@ let particleArray = [];
 
 // Shared settings are read on each frame; changing them never restarts animation.
 const particleSettings = {
-    pushStrength: 0.9,
-    interactionRadius: 80,
-    returnSpeed: 0.1
+    pushStrength: 0.9, // fuerza con la que se empujan las particulas
+    interactionRadius: 80, // radio de interaccion con el mouse
+    returnSpeed: 0.1 // velocidad con la que las particuals vuelve a su posicion org
 };
 const settingControls = [
     { inputId: 'push-strength', outputId: 'push-value', key: 'pushStrength', unit: '' },
     { inputId: 'interaction-radius', outputId: 'radius-value', key: 'interactionRadius', unit: ' px' },
     { inputId: 'return-speed', outputId: 'return-value', key: 'returnSpeed', unit: '' }
 ];
+const repulsionSettings = {
+    repulsionStrength: 2400,
+    interactionRadius: 80,
+    inertiaDuration: 1,
+    returnSpeed: 0.1,
+    bounceEnabled: true,
+    bounceRetention: 60
+};
+let activeMode = document.querySelector('input[name="particle-mode"]:checked').value;
+const repulsionControls = [
+    { inputId: 'repulsion-strength', outputId: 'repulsion-value', key: 'repulsionStrength', unit: ' px/s' },
+    { inputId: 'repulsion-radius', outputId: 'repulsion-radius-value', key: 'interactionRadius', unit: ' px' },
+    { inputId: 'inertia-duration', outputId: 'inertia-value', key: 'inertiaDuration', unit: ' s' },
+    { inputId: 'repulsion-return', outputId: 'repulsion-return-value', key: 'returnSpeed', unit: '' },
+    { inputId: 'bounce-retention', outputId: 'bounce-value', key: 'bounceRetention', unit: ' %' }
+];
 
-settingControls.forEach(function(control) {
+[...settingControls, ...repulsionControls].forEach(function(control) {
+    const settings = repulsionControls.includes(control) ? repulsionSettings : particleSettings;
     const input = document.getElementById(control.inputId);
     const output = document.getElementById(control.outputId);
 
     function updateSetting() {
         const value = input.valueAsNumber;
-        particleSettings[control.key] = value;
+        settings[control.key] = value;
         output.textContent = value.toLocaleString('es-ES') + control.unit;
         input.setAttribute('aria-valuetext', output.textContent);
         const fill = (value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100;
@@ -31,6 +48,22 @@ settingControls.forEach(function(control) {
 
     input.addEventListener('input', updateSetting);
     updateSetting();
+});
+
+const bounceToggle = document.getElementById('bounce-enabled');
+function updateBounceToggle() {
+    repulsionSettings.bounceEnabled = bounceToggle.checked;
+    document.getElementById('bounce-retention').disabled = !bounceToggle.checked;
+}
+bounceToggle.addEventListener('change', updateBounceToggle);
+updateBounceToggle();
+document.querySelectorAll('input[name="particle-mode"]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        if (!input.checked) return;
+        activeMode = input.value;
+        particleArray.forEach(function(particle) { particle.resetRepulsion(); });
+        clearMousePosition();
+    });
 });
 
 // get mouse position
@@ -69,6 +102,82 @@ function drawImg(){
             this.baseX = x + canvas.width/2-png.width*2,
             this.baseY = y + canvas.height/2-png.height*2,
             this.density = ((Math.random() * 10) + 2);
+            this.resetRepulsion();
+        }
+        resetRepulsion() {
+            this.velocityX = 0;
+            this.velocityY = 0;
+            this.inertiaElapsed = 0;
+            this.repulsionState = 'ready';
+        }
+        updateRepulsion(deltaTime) {
+            const settings = repulsionSettings;
+            const pointerActive = mouse.x !== null && mouse.y !== null;
+            const dx = this.x - mouse.x;
+            const dy = this.y - mouse.y;
+            const distance = pointerActive ? Math.hypot(dx, dy) : Infinity;
+            const insideRadius = distance < settings.interactionRadius;
+            // Impulso por encuentro, el regreso no dispara otra repulsion
+            if (this.repulsionState === 'waiting' && pointerActive && !insideRadius) {
+                this.repulsionState = 'ready';
+            }
+            if (this.repulsionState === 'ready' && insideRadius) {
+                const angle = distance === 0 ? this.density * Math.PI : Math.atan2(dy, dx);
+                // Al entrar por el borde, conservar al menos el 65 % del impulso
+                const proximity = 1 - distance / settings.interactionRadius;
+                const strength = settings.repulsionStrength * (0.65 + 0.35 * proximity);
+                this.velocityX = Math.cos(angle) * strength;
+                this.velocityY = Math.sin(angle) * strength;
+                this.inertiaElapsed = 0;
+                this.repulsionState = 'inertia';
+            }
+            if (this.repulsionState === 'inertia') {
+                const stepTime = Math.min(deltaTime, Math.max(0, settings.inertiaDuration - this.inertiaElapsed));
+                this.inertiaElapsed += stepTime;
+                // Frenado exponencial suave: v(t) = vInicial * exp(-dragRate * t)
+                const dragRate = 1.5 / settings.inertiaDuration;
+                const damping = Math.exp(-dragRate * stepTime);
+                // Integrar el recorrido antes de reducir la velocidad evita depender de los FPS
+                const travelTime = (1 - damping) / dragRate;
+                this.x += this.velocityX * travelTime;
+                this.y += this.velocityY * travelTime;
+                this.velocityX *= damping;
+                this.velocityY *= damping;
+                if (settings.bounceEnabled) this.bounceAtEdges();
+                if (this.inertiaElapsed >= settings.inertiaDuration || Math.hypot(this.velocityX, this.velocityY) < 1) {
+                    this.velocityX = 0;
+                    this.velocityY = 0;
+                    this.repulsionState = 'returning';
+                }
+            } else {
+                // Factor equivalente a 60 Hz, independiente del de la pantalla
+                const returnFactor = 1 - Math.pow(1 - settings.returnSpeed, deltaTime * 60);
+                this.x += (this.baseX - this.x) * returnFactor;
+                this.y += (this.baseY - this.y) * returnFactor;
+                if (this.repulsionState === 'returning' && Math.hypot(this.baseX - this.x, this.baseY - this.y) < 0.5) {
+                    this.x = this.baseX;
+                    this.y = this.baseY;
+                    this.repulsionState = 'waiting';
+                }
+            }
+        }
+        bounceAtEdges() {
+            const retention = repulsionSettings.bounceRetention / 100;
+            for (const [position, velocity, extent] of [
+                ['x', 'velocityX', canvas.width], ['y', 'velocityY', canvas.height]
+            ]) {
+                // Superficies menores que el diametro: centrar y detener ese eje
+                if (extent <= this.size * 2) {
+                    this[position] = extent / 2;
+                    this[velocity] = 0;
+                } else if (this[position] < this.size) {
+                    this[position] = this.size;
+                    this[velocity] = Math.abs(this[velocity]) * retention;
+                } else if (this[position] > extent - this.size) {
+                    this[position] = extent - this.size;
+                    this[velocity] = -Math.abs(this[velocity]) * retention;
+                }
+            }
         }
         draw() {
             ctx.beginPath();
@@ -76,8 +185,13 @@ function drawImg(){
             ctx.closePath();
             ctx.fill();
         }
-        update() {
+        update(deltaTime) {
             ctx.fillStyle = this.color;
+            if (activeMode === 'repulsion') {
+                this.updateRepulsion(deltaTime);
+                this.draw();
+                return;
+            }
             // check mouse position/particle position - collision detection
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
@@ -92,7 +206,7 @@ function drawImg(){
             // if we go below zero, set it to zero.
             if (force < 0) force = 0;
 
-            let directionX = (forceDirectionX * force * this.density) * particleSettings.pushStrength; // fuerza con la que se empujan las particulas (org 0.9)
+            let directionX = (forceDirectionX * force * this.density) * particleSettings.pushStrength;
             let directionY = (forceDirectionY * force * this.density) * particleSettings.pushStrength;
 
             if (distance < maxDistance + this.size){
@@ -102,7 +216,7 @@ function drawImg(){
                 if (this.x !== this.baseX ) {
                     let dx = this.x - this.baseX;
                     let dy = this.y - this.baseY;
-                    this.x -= dx * particleSettings.returnSpeed; // velocidad con la que las particuals vuelve a su posicion org (original 5)
+                    this.x -= dx * particleSettings.returnSpeed;
                 } if (this.y !== this.baseY) {
                     let dx = this.x - this.baseX;
                     let dy = this.y - this.baseY;
@@ -130,17 +244,21 @@ function drawImg(){
         }
 
     }
-    function animate(){
+    let previousFrameTime = null;
+    function animate(timestamp){
         requestAnimationFrame(animate);
+        // Limitar pausas largas para evitar saltos al recuperar el foco
+        const deltaTime = previousFrameTime === null ? 0 : Math.min((timestamp - previousFrameTime) / 1000, 0.05);
+        previousFrameTime = timestamp;
         ctx.fillStyle = 'rgba(0,0,0,.2)'; // background
         ctx.fillRect(0, 0, innerWidth,innerHeight); // dibuja rectangulo semitransparente cada vez para crear efecto de seguimiento de las particulas
         
         for (let i = 0; i < particleArray.length; i++){
-            particleArray[i].update();
+            particleArray[i].update(deltaTime);
         }
     }
     init();
-    animate();
+    requestAnimationFrame(animate);
 
     // RESIZE SETTING - empty and refill particle array every time window changes size + change canvas size
     window.addEventListener('resize', function(){

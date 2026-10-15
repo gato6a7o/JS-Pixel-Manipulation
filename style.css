@@ -200,13 +200,42 @@ body {
     box-shadow: 2px 2px 0 var(--panel-ink);
 }
 
-/* Los ajustes existentes solo se muestran con el modo Personalizado activo */
-.panel-content:has(#mode-personalizado:checked) .custom-settings {
+/* Cada modo implementado muestra sus propios controles */
+.panel-content:has(#mode-default:checked) .custom-settings {
     display: block;
 }
 
-.panel-content:has(.mode-option input:not(#mode-personalizado):checked) .custom-settings {
+.panel-content:has(.mode-option input:not(#mode-default):checked) .custom-settings {
     display: none;
+}
+
+.repulsion-settings {
+    display: none;
+}
+
+.panel-content:has(#mode-repulsion:checked) .repulsion-settings {
+    display: block;
+}
+
+.bounce-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 18px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.bounce-toggle input {
+    accent-color: var(--panel-accent);
+}
+
+.setting:has(input:disabled) {
+    opacity: 0.5;
+}
+
+.setting-slider:disabled {
+    cursor: not-allowed;
 }
 
 /* Separador punteado: puntos de 2 px simulando rejilla de píxeles */
